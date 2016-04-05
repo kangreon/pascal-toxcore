@@ -34,12 +34,24 @@ interface
 type
 	TTox = Pointer;
 
+// Uncomment to load a single library.
+//{$DEFINE SINGLELIBTOXCORE}
+
 const
 {$IF Defined(MSWINDOWS)}
-  TOX_LIBRARY     = 'libtoxcore-0.dll';
-  TOX_DNS_LIBRARY = 'libtoxcore-0.dll';
-  TOXES_LIBRARY   = 'libtoxcore-0.dll';
-  TOXAV_LIBRARY   = 'libtoxcore-0.dll';
+  {$IFDEF SINGLELIBTOXCORE}
+    TOX_SINGLE_LIBRARY = 'libtox.dll';
+
+    TOX_LIBRARY     = TOX_SINGLE_LIBRARY;
+    TOX_DNS_LIBRARY = TOX_SINGLE_LIBRARY;
+    TOXES_LIBRARY   = TOX_SINGLE_LIBRARY;
+    TOXAV_LIBRARY   = TOX_SINGLE_LIBRARY;
+  {$ELSE}
+    TOX_LIBRARY     = 'libtoxcore-0.dll';
+    TOX_DNS_LIBRARY = 'libtoxdns-0.dll';
+    TOXES_LIBRARY   = 'libtoxencryptsave-0.dll';
+    TOXAV_LIBRARY   = 'libtoxav-0.dll';
+  {$ENDIF}
 {$ELSEIF Defined(DARWIN)}
   TOX_LIBRARY     = '';
   TOX_DNS_LIBRARY = '';
@@ -53,7 +65,11 @@ const
   TOXAV_LIBRARY   = '';
 {$IFEND}
 
+{$IFDEF FPC}
+  {$MODE Delphi}{$H+}
+{$ENDIF}
 
+const
   (**
    * The major version number. Incremented when the API or ABI changes in an
    * incompatible way.
@@ -3780,7 +3796,7 @@ function tox_get_salt(const data: PByte; salt: PByte): Boolean; cdecl; external 
 //bool tox_pass_key_encrypt(const uint8_t *data, size_t data_len, const TOX_PASS_KEY *key, uint8_t *out,
 //                          TOX_ERR_ENCRYPTION *error);
 function tox_pass_key_encrypt(const data: PByte; data_len: NativeUInt;
-  const key: TToxPassKey; out_data: PByte; var error: TToxErrEncryption): Boolean; cdecl; external TOXES_LIBRARY;
+  var key: TToxPassKey; out_data: PByte; var error: TToxErrEncryption): Boolean; cdecl; external TOXES_LIBRARY;
 
 (* This is the inverse of tox_pass_key_encrypt, also using only keys produced by
  * tox_derive_key_from_pass.
@@ -3792,7 +3808,7 @@ function tox_pass_key_encrypt(const data: PByte; data_len: NativeUInt;
 //bool tox_pass_key_decrypt(const uint8_t *data, size_t length, const TOX_PASS_KEY *key, uint8_t *out,
 //                          TOX_ERR_DECRYPTION *error);
 function tox_pass_key_decrypt(const data: PByte; length: NativeUInt;
-  const key: TToxPassKey; out_data: PByte; var error: TToxErrDecryption): Boolean; cdecl; external TOXES_LIBRARY;
+  var key: TToxPassKey; out_data: PByte; var error: TToxErrDecryption): Boolean; cdecl; external TOXES_LIBRARY;
 
 (* Determines whether or not the given data is encrypted (by checking the magic number)
  *)
